@@ -80,9 +80,9 @@ export default function HomePage() {
               <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <Clock className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-card-foreground mb-2">Fresh Daily</h3>
+              <h3 className="text-xl font-semibold text-card-foreground mb-2">Freshly Made</h3>
               <p className="text-muted-foreground">
-                Prepared fresh every day to ensure the best taste
+                Prepared fresh with care to ensure the best taste every time
               </p>
             </div>
             <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-card border border-border">

@@ -107,7 +107,7 @@ export default function MenuPage() {
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Discover our selection of authentic Nobatia desserts, 
-            made fresh daily with traditional recipes
+            crafted with love using traditional recipes
           </p>
         </div>
       </section>
@@ -151,10 +151,10 @@ export default function MenuPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl md:text-3xl font-bold font-serif text-foreground mb-4">
-              Made Fresh Daily
+              Made with Love
             </h2>
             <p className="text-muted-foreground leading-relaxed">
-              Every bowl of our Nobatia dessert is prepared fresh using premium ingredients. 
+              Every bowl of our Nobatia dessert is prepared using premium ingredients. 
               Our recipes have been passed down through generations, bringing you the authentic 
               taste of Sudan and Egypt. Order now and taste the tradition!
             </p>
