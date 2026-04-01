@@ -46,6 +46,17 @@ const defaultProducts: Product[] = [
     // TODO: Put product image base64 string here
     imageBase64: '/images/product-raisins.jpg',
   },
+  {
+    id: '4',
+    // TODO: Put product name here
+    name: 'Rice with Milk + Chocolate',
+    // TODO: Put product description here
+    description: 'A rich and creamy rice pudding blended with smooth chocolate, topped with chocolate shavings for a decadent twist on the classic favorite.',
+    // TODO: Put product price here
+    price: 11.99,
+    // Place your chocolate image in public/images/product-chocolate.png
+    imageBase64: '/images/product-chocolate.png',
+  },
 ];
 
 export default function MenuPage() {
