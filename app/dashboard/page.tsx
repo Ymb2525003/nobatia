@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { collection, query, where, orderBy, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
@@ -64,36 +64,31 @@ export default function DashboardPage() {
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    async function fetchOrders() {
-      if (!user) return;
+    if (!user) return;
 
-      try {
-        const ordersRef = collection(db, 'orders');
-        const q = query(ordersRef, where('userId', '==', user.uid));
-        const querySnapshot = await getDocs(q);
-        
-        const fetchedOrders: Order[] = [];
-        querySnapshot.forEach((doc) => {
-          fetchedOrders.push({
-            id: doc.id,
-            ...doc.data(),
-          } as Order);
-        });
-        setOrders(
-          fetchedOrders.sort(
-            (a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0),
-          ),
-        );
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
+    const ordersRef = collection(db, 'orders');
+    const q = query(ordersRef, where('userId', '==', user.uid));
 
-    if (user) {
-      fetchOrders();
-    }
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedOrders: Order[] = [];
+      snapshot.forEach((doc) => {
+        fetchedOrders.push({
+          id: doc.id,
+          ...doc.data(),
+        } as Order);
+      });
+      setOrders(
+        fetchedOrders.sort(
+          (a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0),
+        ),
+      );
+      setLoading(false);
+    }, (error) => {
+      console.error('Error fetching orders:', error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, [user]);
 
   const handleCancelOrder = async (orderId: string) => {
@@ -334,13 +329,21 @@ export default function DashboardPage() {
 
                       {order.status !== 'delivered' && order.status !== 'cancelled' && (
                         <div className="mt-4">
-                          <Button
-                            variant="outline"
-                            disabled={deletingOrder === order.id}
-                            onClick={() => handleCancelOrder(order.id)}
-                          >
-                            {deletingOrder === order.id ? 'Cancelling...' : 'Cancel Order'}
-                          </Button>
+                          {order.status === 'preparing' || order.status === 'ready' ? (
+                            <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                              {order.status === 'preparing'
+                                ? 'Your order is already being prepared by our team. Cancellation is no longer available at this stage. Thank you for your patience!'
+                                : 'Your order is ready for pickup/delivery. Cancellation is no longer available. We appreciate your understanding!'}
+                            </p>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              disabled={deletingOrder === order.id}
+                              onClick={() => handleCancelOrder(order.id)}
+                            >
+                              {deletingOrder === order.id ? 'Cancelling...' : 'Cancel Order'}
+                            </Button>
+                          )}
                         </div>
                       )}
 

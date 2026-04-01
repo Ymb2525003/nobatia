@@ -65,12 +65,12 @@ export function CheckoutForm() {
       };
 
       // Save order to Firestore
-      await addDoc(collection(db, 'orders'), orderData);
+      const docRef = await addDoc(collection(db, 'orders'), orderData);
 
-      // Clear cart and redirect
+      // Clear cart and redirect to confirmation page
       clearCart();
       toast.success('Order placed successfully!');
-      router.push('/dashboard');
+      router.push(`/order-confirmation?id=${docRef.id}`);
     } catch (error) {
       console.error('Error placing order:', error);
       toast.error('Failed to place order. Please try again.');

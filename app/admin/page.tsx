@@ -10,8 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Package, Clock, CheckCircle, Loader2, ShoppingBag, Users, DollarSign, AlertCircle, Trash2 } from 'lucide-react';
+import { Package, Clock, CheckCircle, Loader2, ShoppingBag, Users, DollarSign, AlertCircle, Trash2, UtensilsCrossed } from 'lucide-react';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface OrderItem {
   id: string;
@@ -199,11 +200,19 @@ export default function AdminPage() {
     <div className="min-h-screen bg-background py-12">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold font-serif text-foreground">
-            Admin Dashboard
-          </h1>
-          <p className="text-muted-foreground mt-2">Manage orders and track your business</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold font-serif text-foreground">
+              Admin Dashboard
+            </h1>
+            <p className="text-muted-foreground mt-2">Manage orders and track your business</p>
+          </div>
+          <Button asChild>
+            <Link href="/admin/products">
+              <UtensilsCrossed className="mr-2 h-4 w-4" />
+              Manage Products
+            </Link>
+          </Button>
         </div>
 
         {/* Stats */}

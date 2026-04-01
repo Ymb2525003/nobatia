@@ -115,7 +115,7 @@ export default function HomePage() {
             <div className="group rounded-2xl overflow-hidden bg-card border border-border hover:shadow-lg transition-shadow">
               <div className="relative h-64 overflow-hidden">
                 <Image
-                  src="/images/product-pure.jpg"
+                  src="/images/product-pure.png"
                   alt="Pure Rice with Milk"
                   fill
                   className="object-cover transition-transform group-hover:scale-105"
@@ -124,7 +124,7 @@ export default function HomePage() {
               <div className="p-6">
                 <h3 className="text-xl font-semibold text-card-foreground mb-2">Pure Rice with Milk</h3>
                 <p className="text-muted-foreground mb-4">
-                  Classic creamy rice pudding with a hint of vanilla and cinnamon
+                  Classic creamy rice pudding made with premium rice and fresh milk
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-primary">RM8.99</span>

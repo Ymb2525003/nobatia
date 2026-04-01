@@ -18,11 +18,11 @@ const defaultProducts: Product[] = [
     // TODO: Put product name here
     name: 'Pure Rice with Milk',
     // TODO: Put product description here
-    description: 'Classic creamy rice pudding made with premium rice, fresh milk, and a hint of vanilla. Topped with a sprinkle of cinnamon.',
+    description: 'Classic creamy rice pudding made with premium rice and fresh milk. Pure and simple, just the way it should be.',
     // TODO: Put product price here
     price: 8.99,
     // TODO: Put product image base64 string here
-    imageBase64: '/images/product-pure.jpg',
+    imageBase64: '/images/product-pure.png',
   },
   {
     id: '2',
