@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Package, Clock, CheckCircle, Loader2, ShoppingBag, Users, DollarSign, AlertCircle, Trash2, UtensilsCrossed } from 'lucide-react';
+import { Package, Clock, CheckCircle, Loader2, ShoppingBag, Users, DollarSign, AlertCircle, Trash2, UtensilsCrossed, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
@@ -196,6 +196,35 @@ export default function AdminPage() {
   const pendingOrders = activeOrders.filter(o => o.status === 'pending').length;
   const preparingOrders = activeOrders.filter(o => o.status === 'preparing').length;
 
+  // Normalize product names so variants like "Rice with Milk" merge into "Pure Rice with Milk"
+  const normalizeProductName = (name: string): string => {
+    const trimmed = name.trim();
+    if (trimmed.toLowerCase() === 'rice with milk') return 'Pure Rice with Milk';
+    return trimmed;
+  };
+
+  // Aggregate quantities by product name for active orders (pending/preparing/ready)
+  const activeItemSummary: Record<string, number> = {};
+  activeOrders
+    .filter(o => o.status === 'pending' || o.status === 'preparing' || o.status === 'ready')
+    .forEach(order => {
+      order.items.forEach(item => {
+        const name = normalizeProductName(item.name);
+        activeItemSummary[name] = (activeItemSummary[name] || 0) + item.quantity;
+      });
+    });
+
+  // Aggregate quantities by product name for delivered orders
+  const doneItemSummary: Record<string, number> = {};
+  activeOrders
+    .filter(o => o.status === 'delivered')
+    .forEach(order => {
+      order.items.forEach(item => {
+        const name = normalizeProductName(item.name);
+        doneItemSummary[name] = (doneItemSummary[name] || 0) + item.quantity;
+      });
+    });
+
   return (
     <div className="min-h-screen bg-background py-12">
       <div className="container mx-auto px-4">
@@ -259,6 +288,77 @@ export default function AdminPage() {
                 <p className="text-2xl font-bold text-card-foreground">RM{totalRevenue.toFixed(2)}</p>
                 <p className="text-muted-foreground text-sm">Revenue</p>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Category Summaries */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {/* Active Orders by Product */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-card-foreground flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-orange-500" />
+                Active Orders by Product
+              </CardTitle>
+              <CardDescription>Pending, preparing &amp; ready orders</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {Object.keys(activeItemSummary).length === 0 ? (
+                <p className="text-sm text-muted-foreground">No active orders right now.</p>
+              ) : (
+                <div className="space-y-3">
+                  {Object.entries(activeItemSummary)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([name, qty]) => (
+                      <div key={name} className="flex items-center justify-between">
+                        <span className="text-sm text-card-foreground">{name}</span>
+                        <Badge className="bg-orange-100 text-orange-800 font-bold">{qty}</Badge>
+                      </div>
+                    ))}
+                  <Separator />
+                  <div className="flex items-center justify-between font-semibold">
+                    <span className="text-card-foreground">Total Items</span>
+                    <span className="text-primary">
+                      {Object.values(activeItemSummary).reduce((s, q) => s + q, 0)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Done / Delivered Orders by Product */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-card-foreground flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-emerald-500" />
+                Delivered Orders by Product
+              </CardTitle>
+              <CardDescription>Completed / delivered orders</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {Object.keys(doneItemSummary).length === 0 ? (
+                <p className="text-sm text-muted-foreground">No delivered orders yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {Object.entries(doneItemSummary)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([name, qty]) => (
+                      <div key={name} className="flex items-center justify-between">
+                        <span className="text-sm text-card-foreground">{name}</span>
+                        <Badge className="bg-emerald-100 text-emerald-800 font-bold">{qty}</Badge>
+                      </div>
+                    ))}
+                  <Separator />
+                  <div className="flex items-center justify-between font-semibold">
+                    <span className="text-card-foreground">Total Items</span>
+                    <span className="text-primary">
+                      {Object.values(doneItemSummary).reduce((s, q) => s + q, 0)}
+                    </span>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
