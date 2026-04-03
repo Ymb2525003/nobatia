@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Package, Clock, CheckCircle, Loader2, ShoppingBag, Users, DollarSign, AlertCircle, Trash2, UtensilsCrossed, BarChart3 } from 'lucide-react';
+import { Package, Clock, CheckCircle, Loader2, ShoppingBag, Users, DollarSign, AlertCircle, Trash2, UtensilsCrossed, BarChart3, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
@@ -59,6 +59,8 @@ export default function AdminPage() {
   const [updatingOrder, setUpdatingOrder] = useState<string | null>(null);
   const [activeCancelOrder, setActiveCancelOrder] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState('');
+  const [expandedActiveProduct, setExpandedActiveProduct] = useState<string | null>(null);
+  const [expandedDoneProduct, setExpandedDoneProduct] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -307,17 +309,52 @@ export default function AdminPage() {
               {Object.keys(activeItemSummary).length === 0 ? (
                 <p className="text-sm text-muted-foreground">No active orders right now.</p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-1">
                   {Object.entries(activeItemSummary)
                     .sort((a, b) => b[1] - a[1])
-                    .map(([name, qty]) => (
-                      <div key={name} className="flex items-center justify-between">
-                        <span className="text-sm text-card-foreground">{name}</span>
-                        <Badge className="bg-orange-100 text-orange-800 font-bold">{qty}</Badge>
-                      </div>
-                    ))}
+                    .map(([name, qty]) => {
+                      const isExpanded = expandedActiveProduct === name;
+                      const matchingOrders = activeOrders
+                        .filter(o => (o.status === 'pending' || o.status === 'preparing' || o.status === 'ready') &&
+                          o.items.some(i => normalizeProductName(i.name) === name));
+                      return (
+                        <div key={name}>
+                          <button
+                            type="button"
+                            className="w-full flex items-center justify-between py-2 px-2 rounded-lg hover:bg-muted/50 transition-colors"
+                            onClick={() => setExpandedActiveProduct(isExpanded ? null : name)}
+                          >
+                            <span className="text-sm text-card-foreground flex items-center gap-1">
+                              <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${isExpanded ? 'rotate-0' : '-rotate-90'}`} />
+                              {name}
+                            </span>
+                            <Badge className="bg-orange-100 text-orange-800 font-bold">{qty}</Badge>
+                          </button>
+                          {isExpanded && (
+                            <div className="ml-6 mb-2 space-y-2">
+                              {matchingOrders.map(order => {
+                                const itemInOrder = order.items.find(i => normalizeProductName(i.name) === name);
+                                const orderDate = order.createdAt
+                                  ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                                  : 'N/A';
+                                return (
+                                  <div key={order.id} className="text-xs border border-border rounded-lg p-2 bg-muted/30">
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-medium text-card-foreground">#{order.id.slice(0, 8).toUpperCase()}</span>
+                                      <Badge className={`text-[10px] px-1.5 py-0 ${statusConfig[order.status]?.color}`}>{statusConfig[order.status]?.label}</Badge>
+                                    </div>
+                                    <p className="text-muted-foreground mt-1">{order.customerInfo?.name || 'N/A'} &middot; x{itemInOrder?.quantity || 0}</p>
+                                    <p className="text-muted-foreground">{orderDate}</p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   <Separator />
-                  <div className="flex items-center justify-between font-semibold">
+                  <div className="flex items-center justify-between font-semibold pt-2">
                     <span className="text-card-foreground">Total Items</span>
                     <span className="text-primary">
                       {Object.values(activeItemSummary).reduce((s, q) => s + q, 0)}
@@ -341,17 +378,52 @@ export default function AdminPage() {
               {Object.keys(doneItemSummary).length === 0 ? (
                 <p className="text-sm text-muted-foreground">No delivered orders yet.</p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-1">
                   {Object.entries(doneItemSummary)
                     .sort((a, b) => b[1] - a[1])
-                    .map(([name, qty]) => (
-                      <div key={name} className="flex items-center justify-between">
-                        <span className="text-sm text-card-foreground">{name}</span>
-                        <Badge className="bg-emerald-100 text-emerald-800 font-bold">{qty}</Badge>
-                      </div>
-                    ))}
+                    .map(([name, qty]) => {
+                      const isExpanded = expandedDoneProduct === name;
+                      const matchingOrders = activeOrders
+                        .filter(o => o.status === 'delivered' &&
+                          o.items.some(i => normalizeProductName(i.name) === name));
+                      return (
+                        <div key={name}>
+                          <button
+                            type="button"
+                            className="w-full flex items-center justify-between py-2 px-2 rounded-lg hover:bg-muted/50 transition-colors"
+                            onClick={() => setExpandedDoneProduct(isExpanded ? null : name)}
+                          >
+                            <span className="text-sm text-card-foreground flex items-center gap-1">
+                              <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${isExpanded ? 'rotate-0' : '-rotate-90'}`} />
+                              {name}
+                            </span>
+                            <Badge className="bg-emerald-100 text-emerald-800 font-bold">{qty}</Badge>
+                          </button>
+                          {isExpanded && (
+                            <div className="ml-6 mb-2 space-y-2">
+                              {matchingOrders.map(order => {
+                                const itemInOrder = order.items.find(i => normalizeProductName(i.name) === name);
+                                const orderDate = order.createdAt
+                                  ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                                  : 'N/A';
+                                return (
+                                  <div key={order.id} className="text-xs border border-border rounded-lg p-2 bg-muted/30">
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-medium text-card-foreground">#{order.id.slice(0, 8).toUpperCase()}</span>
+                                      <Badge className={`text-[10px] px-1.5 py-0 ${statusConfig[order.status]?.color}`}>{statusConfig[order.status]?.label}</Badge>
+                                    </div>
+                                    <p className="text-muted-foreground mt-1">{order.customerInfo?.name || 'N/A'} &middot; x{itemInOrder?.quantity || 0}</p>
+                                    <p className="text-muted-foreground">{orderDate}</p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   <Separator />
-                  <div className="flex items-center justify-between font-semibold">
+                  <div className="flex items-center justify-between font-semibold pt-2">
                     <span className="text-card-foreground">Total Items</span>
                     <span className="text-primary">
                       {Object.values(doneItemSummary).reduce((s, q) => s + q, 0)}
